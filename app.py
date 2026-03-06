@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 import sqlite3
 
+print("SERVER VERSION 123")
+
 app = FastAPI()
 
 
