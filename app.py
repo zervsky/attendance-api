@@ -3,12 +3,19 @@ import sqlite3
 
 app = FastAPI()
 
+
+# ---------- ROOT ----------
+
 @app.get("/")
 def root():
     return {"status": "API działa"}
 
+
+# ---------- DATABASE ----------
+
 def get_db():
-    return sqlite3.connect("attendance.db")
+    conn = sqlite3.connect("attendance.db", check_same_thread=False)
+    return conn
 
 
 # ---------- PRESENCE ----------
@@ -50,11 +57,29 @@ def get_log():
         "CREATE TABLE IF NOT EXISTS log (name TEXT, termin TEXT, czas TEXT)"
     )
 
-    cur.execute("SELECT * FROM log")
+    cur.execute("SELECT name, termin, czas FROM log")
 
     rows = cur.fetchall()
 
     return rows
+
+
+# ---------- DELETE PRESENCE ----------
+
+@app.post("/delete")
+def delete_log(name: str, termin: str):
+
+    db = get_db()
+    cur = db.cursor()
+
+    cur.execute(
+        "DELETE FROM log WHERE name=? AND termin=?",
+        (name, termin)
+    )
+
+    db.commit()
+
+    return {"status": "deleted"}
 
 
 # ---------- NOTES ----------
@@ -78,21 +103,6 @@ def add_note(name: str, note: str):
 
     return {"status": "ok"}
 
-@app.post("/delete")
-def delete_log(name: str, termin: str):
-
-    db = get_db()
-    cur = db.cursor()
-
-    cur.execute(
-        "DELETE FROM log WHERE name=? AND termin=?",
-        (name, termin)
-    )
-
-    db.commit()
-
-    return {"status": "deleted"}
-
 
 @app.get("/notes")
 def get_notes():
@@ -104,8 +114,11 @@ def get_notes():
         "CREATE TABLE IF NOT EXISTS notes (name TEXT PRIMARY KEY, note TEXT)"
     )
 
-    cur.execute("SELECT * FROM notes")
+    cur.execute("SELECT name, note FROM notes")
 
     rows = cur.fetchall()
 
-    return [{"name": r[0], "note": r[1]} for r in rows]
+    return [
+        {"name": r[0], "note": r[1]}
+        for r in rows
+    ]
