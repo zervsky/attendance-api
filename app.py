@@ -8,6 +8,10 @@ app = FastAPI()
 
 # ---------- ROOT ----------
 
+@app.get("/test")
+def test():
+    return {"server": "ok", "version": "1"}
+
 @app.get("/")
 def root():
     return {"status": "API działa"}
