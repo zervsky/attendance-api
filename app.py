@@ -75,6 +75,21 @@ def add_note(name: str, note: str):
 
     return {"status": "ok"}
 
+@app.post("/delete")
+def delete_log(name: str, termin: str):
+
+    db = get_db()
+    cur = db.cursor()
+
+    cur.execute(
+        "DELETE FROM log WHERE name=? AND termin=?",
+        (name, termin)
+    )
+
+    db.commit()
+
+    return {"status": "deleted"}
+
 
 @app.get("/notes")
 def get_notes():
