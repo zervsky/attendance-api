@@ -3,6 +3,9 @@ import sqlite3
 
 app = FastAPI()
 
+@app.get("/")
+def root():
+    return {"status": "API działa"}
 
 def get_db():
     return sqlite3.connect("attendance.db")
